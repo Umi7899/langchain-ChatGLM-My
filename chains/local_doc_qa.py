@@ -350,7 +350,7 @@ if __name__ == "__main__":
         last_print_len = len(resp["result"])
     source_text = [f"""出处 [{inum + 1}] {doc.metadata['source'] if doc.metadata['source'].startswith("http")
     else os.path.split(doc.metadata['source'])[-1]}：\n\n{doc.page_content}\n\n"""
-                   # f"""相关度：{doc.metadata['score']}\n\n"""
+                   f"""相关度：{doc.metadata['score']}\n\n"""
                    for inum, doc in
                    enumerate(resp["source_documents"])]
     logger.info("\n\n" + "\n\n".join(source_text))
