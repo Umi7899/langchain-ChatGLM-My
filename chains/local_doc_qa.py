@@ -141,62 +141,67 @@ class LocalDocQA:
                                     filepath: str or List[str],
                                     vs_path: str or os.PathLike = None,
                                     sentence_size=SENTENCE_SIZE):
-        loaded_files = []
-        failed_files = []
+        loaded_files = []  # 已成功加载的文件列表
+        failed_files = []  # 未能成功加载的文件列表
+
         if isinstance(filepath, str):
             if not os.path.exists(filepath):
-                print("路径不存在")
+                print("路径不存在")  # 输出路径不存在的提示信息
                 return None
             elif os.path.isfile(filepath):
-                file = os.path.split(filepath)[-1]
+                file = os.path.split(filepath)[-1]  # 获取文件名
                 try:
-                    docs = load_file(filepath, sentence_size)
-                    logger.info(f"{file} 已成功加载")
-                    loaded_files.append(filepath)
+                    docs = load_file(filepath, sentence_size)  # 加载文件，生成文档列表
+                    logger.info(f"{file} 已成功加载")  # 记录成功加载的文件名
+                    loaded_files.append(filepath)  # 将成功加载的文件路径添加到列表中
                 except Exception as e:
                     logger.error(e)
-                    logger.info(f"{file} 未能成功加载")
+                    logger.info(f"{file} 未能成功加载")  # 记录未能成功加载的文件名
                     return None
             elif os.path.isdir(filepath):
                 docs = []
                 for fullfilepath, file in tqdm(zip(*tree(filepath, ignore_dir_names=['tmp_files'])), desc="加载文件"):
                     try:
-                        docs += load_file(fullfilepath, sentence_size)
-                        loaded_files.append(fullfilepath)
+                        docs += load_file(fullfilepath, sentence_size)  # 加载文件，生成文档列表
+                        loaded_files.append(fullfilepath)  # 将成功加载的文件路径添加到列表中
                     except Exception as e:
                         logger.error(e)
-                        failed_files.append(file)
+                        failed_files.append(file)  # 将未能成功加载的文件名添加到列表中
 
                 if len(failed_files) > 0:
                     logger.info("以下文件未能成功加载：")
                     for file in failed_files:
-                        logger.info(f"{file}\n")
+                        logger.info(f"{file}\n")  # 输出未能成功加载的文件名
 
         else:
             docs = []
             for file in filepath:
                 try:
-                    docs += load_file(file)
-                    logger.info(f"{file} 已成功加载")
-                    loaded_files.append(file)
+                    docs += load_file(file)  # 加载文件，生成文档列表
+                    logger.info(f"{file} 已成功加载")  # 记录成功加载的文件名
+                    loaded_files.append(file)  # 将成功加载的文件路径添加到列表中
                 except Exception as e:
                     logger.error(e)
-                    logger.info(f"{file} 未能成功加载")
+                    logger.info(f"{file} 未能成功加载")  # 记录未能成功加载的文件名
+
         if len(docs) > 0:
+            print("--------")
+            print(docs)
+            print("--------")
             logger.info("文件加载完毕，正在生成向量库")
             if vs_path and os.path.isdir(vs_path) and "index.faiss" in os.listdir(vs_path):
-                vector_store = load_vector_store(vs_path, self.embeddings)
-                vector_store.add_documents(docs)
+                vector_store = load_vector_store(vs_path, self.embeddings)  # 加载向量库
+                vector_store.add_documents(docs)  # 向向量库添加文档
                 torch_gc()
             else:
                 if not vs_path:
                     vs_path = os.path.join(KB_ROOT_PATH,
                                            f"""{"".join(lazy_pinyin(os.path.splitext(file)[0]))}_FAISS_{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}""",
                                            "vector_store")
-                vector_store = MyFAISS.from_documents(docs, self.embeddings)  # docs 为Document列表
+                vector_store = MyFAISS.from_documents(docs, self.embeddings)  # 创建新的向量库
                 torch_gc()
 
-            vector_store.save_local(vs_path)
+            vector_store.save_local(vs_path)  # 将向量库保存到本地
             return vs_path, loaded_files
         else:
             logger.info("文件均未成功加载，请检查依赖包或替换为其他文件再次上传。")
@@ -223,14 +228,20 @@ class LocalDocQA:
             logger.error(e)
             return None, [one_title]
 
+    #定位：获取回答
     def get_knowledge_based_answer(self, query, vs_path, chat_history=[], streaming: bool = STREAMING):
+        # 加载向量存储
         vector_store = load_vector_store(vs_path, self.embeddings)
         vector_store.chunk_size = self.chunk_size
         vector_store.chunk_conent = self.chunk_conent
         vector_store.score_threshold = self.score_threshold
+
+        # 使用相似度搜索获取相关文档及其得分
         related_docs_with_score = vector_store.similarity_search_with_score(query, k=self.top_k)
-        torch_gc()
+        torch_gc()  # 清理Torch的内存垃圾
+
         if len(related_docs_with_score) > 0:
+            # 根据相关文档和查询生成提示
             prompt = generate_prompt(related_docs_with_score, query)
         else:
             prompt = query
@@ -239,7 +250,9 @@ class LocalDocQA:
                                                       streaming=streaming):
             resp = answer_result.llm_output["answer"]
             history = answer_result.history
-            history[-1][0] = query
+            history[-1][0] = query  # 更新历史记录中最后一项的查询
+
+            # 构建响应对象
             response = {"query": query,
                         "result": resp,
                         "source_documents": related_docs_with_score}

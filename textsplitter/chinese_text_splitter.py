@@ -12,17 +12,17 @@ class ChineseTextSplitter(CharacterTextSplitter):
 
     def split_text1(self, text: str) -> List[str]:
         if self.pdf:
-            text = re.sub(r"\n{3,}", "\n", text)
-            text = re.sub('\s', ' ', text)
-            text = text.replace("\n\n", "")
-        sent_sep_pattern = re.compile('([﹒﹔﹖﹗．。！？]["’”」』]{0,2}|(?=["‘“「『]{1,2}|$))')  # del ：；
-        sent_list = []
-        for ele in sent_sep_pattern.split(text):
-            if sent_sep_pattern.match(ele) and sent_list:
-                sent_list[-1] += ele
-            elif ele:
-                sent_list.append(ele)
-        return sent_list
+            text = re.sub(r"\n{3,}", "\n", text)  # 将连续的换行符替换为单个换行符
+            text = re.sub('\s', ' ', text)  # 将所有空白字符替换为空格
+            text = text.replace("\n\n", "")  # 将连续的两个换行符替换为空字符串
+        sent_sep_pattern = re.compile('([﹒﹔﹖﹗．。！？]["’”」』]{0,2}|(?=["‘“「『]{1,2}|$))')  # 句子分隔模式：标点符号+引号或者引号本身
+        sent_list = []  # 存储分割后的句子列表
+        for ele in sent_sep_pattern.split(text):  # 遍历文本中按句子分隔模式分割后的部分
+            if sent_sep_pattern.match(ele) and sent_list:  # 如果当前部分以句子分隔模式开头，并且已经存在句子列表
+                sent_list[-1] += ele  # 将当前部分追加到最后一个句子上
+            elif ele:  # 如果当前部分不为空
+                sent_list.append(ele)  # 将当前部分添加到句子列表中
+        return sent_list  # 返回分割后的句子列表
 
     def split_text(self, text: str) -> List[str]:   ##此处需要进一步优化逻辑
         if self.pdf:
