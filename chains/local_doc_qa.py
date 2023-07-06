@@ -105,9 +105,9 @@ def generate_prompt(related_docs: List[str],
                     prompt_template: str = PROMPT_TEMPLATE, ) -> str:
     context = "\n".join([doc.page_content for doc in related_docs])
     prompt = prompt_template.replace("{question}", query).replace("{context}", context)
-    print("______________")
-    print(prompt)
-    print("______________")
+    # print("______________")
+    # print(prompt)
+    # print("______________")
     return prompt
 
 
@@ -232,7 +232,7 @@ class LocalDocQA:
             return None, [one_title]
 
     #定位：获取回答
-    def get_knowledge_based_answer(self, query, vs_path, chat_history=[], streaming: bool = STREAMING):
+    def     get_knowledge_based_answer(self, query, vs_path, chat_history=[], streaming: bool = STREAMING):
         # 加载向量存储
         vector_store = load_vector_store(vs_path, self.embeddings)
         vector_store.chunk_size = self.chunk_size
@@ -289,6 +289,7 @@ class LocalDocQA:
     def get_search_result_based_answer(self, query, chat_history=[], streaming: bool = STREAMING):
         results = bing_search(query)
         result_docs = search_result2docs(results)
+        print(result_docs)
         prompt = generate_prompt(result_docs, query)
 
         for answer_result in self.llm.generatorAnswer(prompt=prompt, history=chat_history,
