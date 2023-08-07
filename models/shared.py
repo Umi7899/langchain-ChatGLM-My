@@ -8,7 +8,7 @@ from models.base import BaseAnswer
 loaderCheckPoint: LoaderCheckPoint = None
 
 
-def loaderLLM(llm_model: str = None, no_remote_model: bool = False, use_ptuning_v2: bool = True) -> Any:
+def loaderLLM(llm_model: str = None, no_remote_model: bool = False, use_ptuning_v2: bool = False) -> Any:
     """
     init llm_model_ins LLM
     :param llm_model: model_name

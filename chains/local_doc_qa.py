@@ -238,9 +238,6 @@ class LocalDocQA:
 
         # 使用相似度搜索获取相关文档及其得分
         related_docs_with_score = vector_store.similarity_search_with_score(query, k=self.top_k)
-        print("______________")
-        print(related_docs_with_score)
-        print("______________")
         torch_gc()  # 清理Torch的内存垃圾
 
         if len(related_docs_with_score) > 0:

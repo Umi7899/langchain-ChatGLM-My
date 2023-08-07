@@ -136,19 +136,28 @@ LLM_DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mp
 KB_ROOT_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "knowledge_base")
 
 # 基于上下文的prompt模版，请务必保留"{question}"和"{context}"
+# 基于上下文的prompt模版，请务必保留"{question}"和"{context}"
+# PROMPT_TEMPLATE = """已知信息：
+# {context}
+#
+# 根据上述已知信息，简洁和专业的来回答用户的问题。如果无法从中得到答案，请说 “根据已知信息无法回答该问题” 或 “没有提供足够的相关信息”，不允许在答案中添加编造成分，答案请使用中文。 问题是：{question}"""
+
 PROMPT_TEMPLATE = """已知信息：
 {context} 
 
-根据上述已知信息，简洁和专业的来回答用户的问题。如果无法从中得到答案，请说 “根据已知信息无法回答该问题” 或 “没有提供足够的相关信息”，不允许在答案中添加编造成分，答案请使用中文。 问题是：{question}"""
+根据已知的问答对文本，找出与用户提问相似度最高的一个question，随后直接输出其所对应的answer文本。如果无较为相似的question，请说 “根据已知信息无法回答该问题” 或 “没有提供足够的相关信息”。
+注意，你不允许擅自改编或编造answer文本，必须一字不差地输出原本的内容，不允许仅截取部分输出。不允许根据LLM的本体知识生成答案。
+你需要输出的是answer，不是question。
+用户提问是：{question}"""
 
 # 缓存知识库数量
 CACHED_VS_NUM = 1
 
 # 文本分句长度
-SENTENCE_SIZE = 200
+SENTENCE_SIZE = 100
 
 # 匹配后单段上下文长度
-CHUNK_SIZE = 200
+CHUNK_SIZE = 500
 
 # 传入LLM的历史记录长度
 LLM_HISTORY_LEN = 3
