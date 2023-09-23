@@ -18,7 +18,7 @@ from agent import bing_search
 from langchain.docstore.document import Document
 from functools import lru_cache
 from textsplitter.zh_title_enhance import zh_title_enhance
-
+import lottery_predicter_pl_end
 
 # patch HuggingFaceEmbeddings to make it hashable
 def _embeddings_hash(self):
@@ -103,8 +103,9 @@ def write_check_file(filepath, docs):
 def generate_prompt(related_docs: List[str],
                     query: str,
                     prompt_template: str = PROMPT_TEMPLATE, ) -> str:
-    context = "\n".join([doc.page_content for doc in related_docs])
-    prompt = prompt_template.replace("{question}", query).replace("{context}", context)
+    # context = "\n".join([doc.page_content for doc in related_docs])
+    prediction=lottery_predicter_pl_end.unique_cc_str
+    prompt = prompt_template.replace("{question}", query).replace("{pred}", prediction)
     return prompt
 
 
@@ -239,13 +240,14 @@ class LocalDocQA:
         # 使用相似度搜索获取相关文档及其得分
         related_docs_with_score = vector_store.similarity_search_with_score(query, k=self.top_k)
         torch_gc()  # 清理Torch的内存垃圾
-
+        '''
         if len(related_docs_with_score) > 0:
             # 根据相关文档和查询生成提示
             prompt = generate_prompt(related_docs_with_score, query)
         else:
             prompt = query
-
+        '''
+        prompt = generate_prompt(related_docs_with_score, query)
         for answer_result in self.llm.generatorAnswer(prompt=prompt, history=chat_history,
                                                       streaming=streaming):
             resp = answer_result.llm_output["answer"]

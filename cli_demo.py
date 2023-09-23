@@ -8,7 +8,7 @@ from models.loader import LoaderCheckPoint
 nltk.data.path = [NLTK_DATA_PATH] + nltk.data.path
 
 # Show reply with source text from input document
-REPLY_WITH_SOURCE = True
+REPLY_WITH_SOURCE = False
 
 
 def main():
@@ -31,44 +31,8 @@ def main():
     history = []
 
     # Read input text from a file
-    input_text = """7星彩的基本投注规则是什么？
-在单场大小分游戏中，如果比赛进行中因故中断了怎么办？
-什么情况下会认定因故中断的比赛为无效场次？
-单场大小分游戏中，比赛开始后。参赛队伍和我投注时不同，投注还有效吗？
-大乐透一等奖的奖金有多少？
-大乐透一等奖奖金如何计算？
-大乐透一等奖奖金具体计算方法是什么？
-单场竞猜胜分差游戏中的“主26+”是什么？
-7星彩各个奖项的中奖条件是怎样的？
-7星彩的三等奖中奖条件是什么？
-单场胜分差游戏怎么玩？
-大乐透怎么玩？
-什么是过关投注？
-过关投注的规则是什么？
-我想买足彩，有哪些玩法？
-让分胜负游戏的规则是什么？
-7星彩是什么？它和大乐透有什么不同？
-中国篮球彩票的单场竞猜大小分游戏是什么意思？我如何参与并下注？
-单场竞猜让分胜负游戏中的"让分"是什么含义？
-我如何在单场竞猜大小分游戏中下注？
-单场竞猜胜分差游戏的规则是怎样的？
-单场竞猜胜分差游戏设置哪些投注选项？
-中奖后我该如何领取彩票奖金？
-中奖后我该如何兑奖？
-单场竞猜大小分游戏中，大小分的设定是由谁决定的？
-单场竞猜大小分游戏奖金是如何设置的？
-篮球彩票单场竞猜大小分游戏中的“大小分”是什么意思？
-在单场竞猜胜分差游戏中，如果比赛最后结果与我的预测不完全相符，是否还有机会中奖？
-如果我购买的彩票遗失了或者损坏了，还能兑奖吗？
-大乐透和七星彩分别什么时候开奖？
-大乐透什么时候开奖？
-七星彩什么时候开奖？
-    """
-
-    # Split input_text into paragraphs
-    paragraphs = input_text.strip().split('\n')
-
-    for query in paragraphs:
+    while True:
+        query = input("\n Input your question 请输入问题：\n")
         last_print_len = 0
         for resp, history in local_doc_qa.get_knowledge_based_answer(query=query,
                                                                      vs_path=vs_path,
